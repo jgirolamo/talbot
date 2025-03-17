@@ -13,9 +13,5 @@ ENV PATH="/home/nonroot/.local/bin:${PATH}"
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-#python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; \
-#AutoModelForCausalLM.from_pretrained('TinyLlama/TinyLlama-1.1B-Chat-v1.0'); \
-#AutoTokenizer.from_pretrained('TinyLlama/TinyLlama-1.1B-Chat-v1.0')"
-
 # Set the command to run the bot
 CMD ["bot.py"]

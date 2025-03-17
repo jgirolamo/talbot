@@ -4,4 +4,3 @@
 
 - Added AI Summarisation first version
 - Weather output now capitalises the name of the city.
-  
