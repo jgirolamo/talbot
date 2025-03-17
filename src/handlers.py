@@ -32,7 +32,7 @@ GIFS = {
 }
 
 
-async def summary_command(update: Update, context: CallbackContext):
+async def summary_command(update: Update, _context: CallbackContext):
     """Send private inline keyboard for summary timeframe selection."""
     try:
         print(f"[DEBUG] User {update.message.from_user.id} requested a summary.")
