@@ -6,7 +6,6 @@ import sqlite3
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 import torch
 
-# Load TinyLlama model
 MODEL_NAME = "facebook/bart-large-cnn"
 
 # Detect if GPU is available (MPS for Mac, CUDA for NVIDIA, fallback to CPU)
@@ -26,7 +25,7 @@ except ValueError as e:
     print(f"[ERROR] Model configuration issue: {e}")
 
 def summarize_messages(messages):
-    """Summarizes a list of messages using TinyLlama."""
+    """Summarizes a list of messages using bart-large-cnn."""
     if not messages:
         print("[DEBUG] No messages found for summarization.")
         return "No messages found in the selected timeframe."
