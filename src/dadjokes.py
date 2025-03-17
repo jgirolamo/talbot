@@ -1,5 +1,6 @@
 """
-Module for interacting with the Dad Jokes API and pulling Dad Jokes using the /dadjokes command for Telegram.
+Module for interacting with the Dad Jokes API 
+and pulling Dad Jokes using the /dadjokes command for Telegram.
 """
 
 import requests

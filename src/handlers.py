@@ -1,12 +1,22 @@
 """
 Module for handling Telegram messages by reacting with emojis or stickers.
 """
-
-from datetime import datetime
-
-from telegram import Update
+import time
+import sqlite3
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+from telegram.error import TelegramError
+from requests.exceptions import RequestException
+from message_store import store_message
+from summarizer import fetch_messages, summarize_messages
 
+SUMMARY_OPTIONS = {
+    "1h": 3600,
+    "4h": 14400,
+    "6h": 21600,
+    "12h": 43200,
+    "24h": 86400
+}
 
 KEYWORDS = {
     "cunts": "🍑",
@@ -21,8 +31,74 @@ GIFS = {
     "v1.Y2lkPTc5MGI3NjExcG0yODg0dXF2bml5YWhrc24ycmpxOTl3dnF6cGo0cmV2N2N4Y2QzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/12jpDs6Z9rSQNO/giphy.gif",
 }
 
-# Store messages
-message_log = []
+
+async def summary_command(update: Update, _context: CallbackContext):
+    """Send private inline keyboard for summary timeframe selection."""
+    try:
+        print(f"[DEBUG] User {update.message.from_user.id} requested a summary.")
+
+        keyboard = [[InlineKeyboardButton(f"{key} Summary", callback_data=key)] for key in SUMMARY_OPTIONS]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await update.message.reply_text(
+            "Select the time range for the summary:",
+            reply_markup=reply_markup
+        )
+
+    except TelegramError as e:
+        print(f"[ERROR] Telegram API error: {e}")
+    except AttributeError as e:
+        print(f"[ERROR] Missing message data: {e}")
+
+async def handle_summary_selection(update: Update, context: CallbackContext):
+    """Fetch and summarize messages based on user selection."""
+    try:
+        query = update.callback_query
+        await query.answer()
+
+        user_id = query.from_user.id
+        chat_id = query.message.chat_id
+        selected_option = query.data  # Get selected timeframe (e.g., "1h", "4h")
+
+        print(f"[DEBUG] User {user_id} selected: {selected_option}")
+
+        if selected_option not in SUMMARY_OPTIONS:
+            print(f"[ERROR] Invalid selection: {selected_option}")
+            await query.message.reply_text("❌ Invalid selection. Please try again.")
+            return
+
+        timeframe = SUMMARY_OPTIONS[selected_option]
+        now = int(time.time())
+        start_time = now - timeframe
+
+        print(f"[DEBUG] Fetching messages from last {selected_option}...")
+
+        messages = fetch_messages(chat_id, start_time)
+
+        print(f"[DEBUG] Retrieved {len(messages)} messages.")
+
+        summary = summarize_messages(messages)
+
+        print(f"[DEBUG] Sending summary to user {user_id}.")
+
+        await context.bot.send_message(
+            chat_id=user_id,  # Send summary in private chat
+            text=f"📌 *Summary for the last {selected_option}:*\n\n{summary}",
+            parse_mode="Markdown"
+        )
+
+        await query.message.reply_text("✅ Your summary has been sent to you in a private chat!")
+
+    except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+        print(f"[ERROR] Database error: {e}")
+    except TelegramError as e:
+        print(f"[ERROR] Telegram API error: {e}")
+    except RequestException as e:
+        print(f"[ERROR] Network issue: {e}")
+    except KeyError as e:
+        print(f"[ERROR] Invalid dictionary key: {e}")
+    except AttributeError as e:
+        print(f"[ERROR] Callback data missing: {e}")
 
 async def handle_message(update: Update, context: CallbackContext) -> None:
     """
@@ -32,11 +108,24 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     If a sticker trigger is found, sends the corresponding sticker and stops further processing.
     Otherwise, checks for emoji triggers and reacts to the first match found.
     """
-    message_text = update.message.text.lower()
-    chat_id = update.message.chat_id
+    try:
+        if not update.message or not update.message.text:
+            print("[BOT] Received non-text message or empty update.")
+            return
 
-    # Log message with timestamp
-    message_log.append((datetime.utcnow(), chat_id, update.message.text))
+        message_text = update.message.text
+        chat_id = update.message.chat_id
+        user_id = update.message.from_user.id
+
+        print(f"✅ [BOT] Received message from {user_id} in chat {chat_id}: {message_text}")
+
+        # ✅ Ensure message is stored
+        store_message(chat_id, user_id, message_text)
+
+    except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+        print(f"[ERROR] Database error: {e}")
+    except AttributeError as e:
+        print(f"[ERROR] Message object is missing: {e}")
 
     # Check for GIF triggers
     for keyword, gif_url in GIFS.items():

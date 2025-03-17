@@ -19,7 +19,10 @@ def get_saltney_weather() -> str:
 
         if temperature_element:
             temperature_value = temperature_element.find_next().text.strip()
-            return f"Current Outside Temperature in Saltney: {temperature_value}\nProvided to you by Jake's Weather Station\nhttp://wx.ja91.uk"
+            return (
+                f"Current Outside Temperature in Saltney: {temperature_value}\n"
+                f"Provided to you by Jake's Weather Station\nhttp://wx.ja91.uk"
+            )
 
         print("Could not find 'Outside Temperature' on wx.ja91.uk")
         return "Weather data for Saltney is unavailable."
@@ -91,7 +94,10 @@ def get_weather(location: str) -> str:
         temperature = weather_data['temperature']
         weather_description = "Rainy" if weather_data['weathercode'] in [61, 63, 65, 80, 81, 82] else "Clear/Cloudy"
         print("Weather data: %s°C, Condition: %s", temperature, weather_description)
-        return f"Current weather in {location}:\n🌡 Temperature: {temperature}°C\n☁ Condition: {weather_description}"
+        return (
+            f"Current weather in {location.capitalize()}:\n"
+            f"🌡 Temperature: {temperature}°C\n☁ Condition: {weather_description}"
+        )
     print("Error fetching weather data: %s, weather_response.text")
     return "Error retrieving weather data. Please try again later."
 
