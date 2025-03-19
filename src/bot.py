@@ -16,6 +16,8 @@ from dadjokes import register_dadjokes_handler
 from handlers import handle_message, summary_command, handle_summary_selection
 from message_store import purge_old_messages
 from summarizer import daily_group_summary
+from brlusdgraph import register_brlusdgraph_handler
+
 
 # Debugging
 print("Python executable:", sys.executable)
@@ -33,6 +35,7 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CommandHandler("summary", summary_command))
     app.add_handler(CallbackQueryHandler(handle_summary_selection))  # ✅ Ensure button clicks are handled
+  
 
     # ✅ Start job queue (ensure it is running)
     job_queue = app.job_queue
@@ -50,7 +53,8 @@ async def main():
     register_imdb_handler(app)
     register_brl_handler(app)
     register_dadjokes_handler(app)
-
+    register_brlusdgraph_handler(app)
+    
     print("\n### Bot started! ###\n")
 
     # Start bot
