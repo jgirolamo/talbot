@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import io
 import base64
+from telegram import Update
 from telegram.ext import CommandHandler, Application
 
 

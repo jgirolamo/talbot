@@ -17,7 +17,9 @@ from handlers import handle_message, summary_command, handle_summary_selection
 from message_store import purge_old_messages
 from summarizer import daily_group_summary
 from brlusdgraph import register_brlusdgraph_handler
-
+from btcusdgraph import register_btcusdgraph_handler
+from currencyconverter import register_converter_handler
+from currencyconverter import register_currency_handler
 
 # Debugging
 print("Python executable:", sys.executable)
@@ -54,6 +56,9 @@ async def main():
     register_brl_handler(app)
     register_dadjokes_handler(app)
     register_brlusdgraph_handler(app)
+    register_btcusdgraph_handler(app)
+    register_converter_handler(app)
+    register_currency_handler(app)
     
     print("\n### Bot started! ###\n")
 
