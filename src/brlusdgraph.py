@@ -154,7 +154,7 @@ def handle_exchange_rate_command(update, context):
     # Delete the "processing" message
     message.delete()
 
-    def register_brlusdgraph_handler(app):
+def register_brlusdgraph_handler(app):
       
         """
         Register the /brl_usd command and its callback query handler with the Telegram application.

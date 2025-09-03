@@ -158,7 +158,7 @@ def handle_btc_price_command(update, context):
     # Delete the "processing" message
     message.delete()
 
-    def register_btcusdgraph_handler(app):
+def register_btcusdgraph_handler(app):
       
         """
         Register the /btc_usd command and its callback query handler with the Telegram application.
